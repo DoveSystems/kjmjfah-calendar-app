@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isToday, startOfWeek, endOfWeek } from 'date-fns';
 import { useStore } from '../store/useStore';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Download } from 'lucide-react';
 import TimeOffDialog from './TimeOffDialog';
+import jsPDF from 'jspdf';
 
 const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -30,6 +31,167 @@ const Calendar = () => {
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
     setShowTimeOffDialog(true);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF('landscape', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+    const contentHeight = pageHeight - (margin * 2);
+
+    // Title
+    doc.setFontSize(24);
+    doc.setTextColor(99, 102, 241); // indigo-600
+    doc.text('KJMJFAH Team Calendar', margin, margin + 10);
+    
+    // Month and Year
+    doc.setFontSize(18);
+    doc.setTextColor(0, 0, 0);
+    doc.text(format(currentMonth, 'MMMM yyyy'), margin, margin + 20);
+
+    // Team Members List
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    let yPos = margin + 30;
+    doc.setFont(undefined, 'bold');
+    doc.text('Team Members:', margin, yPos);
+    yPos += 7;
+    doc.setFont(undefined, 'normal');
+    
+    users.forEach((user, index) => {
+      if (yPos > pageHeight - 50) {
+        doc.addPage();
+        yPos = margin + 10;
+      }
+      doc.text(`${index + 1}. ${user.name} (${user.team}) - ${user.country}, ${user.location}`, margin + 5, yPos);
+      yPos += 6;
+    });
+
+    // Calendar Grid
+    const weekStart = startOfWeek(monthStart);
+    const weekEnd = endOfWeek(monthEnd);
+    const allDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    
+    const cellWidth = contentWidth / 7;
+    const cellHeight = 20;
+    const calendarStartY = yPos + 10;
+    
+    // Day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    dayHeaders.forEach((day, index) => {
+      const xPos = margin + (index * cellWidth) + (cellWidth / 2);
+      doc.text(day, xPos, calendarStartY, { align: 'center' });
+    });
+
+    // Calendar grid
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+    let currentY = calendarStartY + 8;
+    
+    allDays.forEach((day, index) => {
+      const weekIndex = Math.floor(index / 7);
+      const dayIndex = index % 7;
+      const xPos = margin + (dayIndex * cellWidth);
+      const yPos = calendarStartY + 10 + (weekIndex * cellHeight);
+      
+      if (yPos + cellHeight > pageHeight - margin) {
+        doc.addPage();
+        currentY = margin + 10;
+      }
+      
+      const isCurrentMonthDay = isSameMonth(day, currentMonth);
+      const dayTimeOffs = getTimeOffsForDate(day);
+      const sprint = getSprintInfo(day);
+      
+      // Draw cell border
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(xPos, yPos - 5, cellWidth, cellHeight);
+      
+      // Day number
+      doc.setFont(undefined, isToday(day) ? 'bold' : 'normal');
+      doc.setTextColor(isCurrentMonthDay ? 0 : 150);
+      doc.text(format(day, 'd'), xPos + 2, yPos);
+      
+      // Sprint info
+      if (sprint && isCurrentMonthDay) {
+        doc.setFontSize(7);
+        doc.setTextColor(139, 92, 246); // purple-500
+        doc.text(`S${sprint.number}`, xPos + 2, yPos + 5);
+        doc.setFontSize(8);
+      }
+      
+      // Time-off entries
+      if (dayTimeOffs.length > 0 && isCurrentMonthDay) {
+        doc.setFontSize(6);
+        dayTimeOffs.slice(0, 2).forEach((to, i) => {
+          const user = users.find((u) => u.id === to.userId);
+          if (user) {
+            doc.setTextColor(251, 146, 60); // orange-400
+            const text = `${user.name.substring(0, 8)}`;
+            doc.text(text, xPos + 2, yPos + 8 + (i * 4));
+          }
+        });
+        if (dayTimeOffs.length > 2) {
+          doc.setTextColor(100, 100, 100);
+          doc.text(`+${dayTimeOffs.length - 2}`, xPos + 2, yPos + 16);
+        }
+        doc.setFontSize(8);
+      }
+      
+      doc.setTextColor(0, 0, 0);
+    });
+
+    // Time-off Summary
+    const summaryY = calendarStartY + (Math.ceil(allDays.length / 7) * cellHeight) + 15;
+    if (summaryY < pageHeight - 40) {
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Time-Off Summary:', margin, summaryY);
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      let summaryYPos = summaryY + 8;
+      
+      timeOffs
+        .filter(to => {
+          const start = new Date(to.startDate);
+          const end = new Date(to.endDate);
+          return (start >= monthStart && start <= monthEnd) || (end >= monthStart && end <= monthEnd) || (start <= monthStart && end >= monthEnd);
+        })
+        .forEach((to) => {
+          if (summaryYPos > pageHeight - margin) {
+            doc.addPage();
+            summaryYPos = margin + 10;
+          }
+          const user = users.find((u) => u.id === to.userId);
+          const startDate = format(new Date(to.startDate), 'MMM d');
+          const endDate = format(new Date(to.endDate), 'MMM d, yyyy');
+          doc.text(`${user?.name || 'Unknown'}: ${startDate} - ${endDate} (${to.reason})`, margin + 5, summaryYPos);
+          summaryYPos += 6;
+        });
+    }
+
+    // Footer
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${totalPages} | Generated on ${format(new Date(), 'MMM d, yyyy')}`,
+        pageWidth / 2,
+        pageHeight - 5,
+        { align: 'center' }
+      );
+    }
+
+    // Save PDF
+    const fileName = `KJMJFAH-Calendar-${format(currentMonth, 'MMMM-yyyy')}.pdf`;
+    doc.save(fileName);
   };
 
   return (
@@ -62,6 +224,13 @@ const Calendar = () => {
             className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all font-medium shadow-sm"
           >
             Next
+          </button>
+          <button
+            onClick={exportToPDF}
+            className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export PDF
           </button>
         </div>
       </div>
