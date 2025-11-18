@@ -16,13 +16,28 @@ export interface TimeOff {
   sprintNumber?: number;
 }
 
+export type BugType = 'bug' | 'not-a-bug' | 'regression' | 'enhancement' | 'feature';
+
+export interface BugSubtask {
+  id: string;
+  description: string;
+  completed: boolean;
+  timeSpent?: number; // in minutes
+}
+
 export interface BugTimeEntry {
   id: string;
   userId: string;
   bugNumber: string;
+  bugType: BugType;
+  title?: string;
+  description?: string;
+  subtasks: BugSubtask[];
   startTime: Date;
   endTime?: Date;
   duration?: number; // in minutes
+  isFinished: boolean;
+  finishedDate?: Date;
 }
 
 export interface Sprint {

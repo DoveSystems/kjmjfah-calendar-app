@@ -39,7 +39,6 @@ const Calendar = () => {
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
     const contentWidth = pageWidth - (margin * 2);
-    const contentHeight = pageHeight - (margin * 2);
 
     // Title
     doc.setFontSize(24);
@@ -90,7 +89,6 @@ const Calendar = () => {
     // Calendar grid
     doc.setFont(undefined, 'normal');
     doc.setFontSize(8);
-    let currentY = calendarStartY + 8;
     
     allDays.forEach((day, index) => {
       const weekIndex = Math.floor(index / 7);
@@ -100,7 +98,6 @@ const Calendar = () => {
       
       if (yPos + cellHeight > pageHeight - margin) {
         doc.addPage();
-        currentY = margin + 10;
       }
       
       const isCurrentMonthDay = isSameMonth(day, currentMonth);
@@ -176,7 +173,7 @@ const Calendar = () => {
     }
 
     // Footer
-    const totalPages = doc.getNumberOfPages();
+    const totalPages = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFontSize(8);

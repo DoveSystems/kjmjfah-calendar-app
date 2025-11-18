@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User, TimeOff, BugTimeEntry, Sprint, Theme } from '../types';
+import { User, TimeOff, BugTimeEntry, Sprint, Theme, BugType, BugSubtask } from '../types';
 import { addDays, differenceInDays } from 'date-fns';
 
 // Calculate sprint number based on date (2-week sprints)
@@ -35,8 +35,12 @@ interface AppState {
   setOnboarded: (onboarded: boolean) => void;
   addTimeOff: (timeOff: Omit<TimeOff, 'id' | 'sprintNumber'>) => void;
   removeTimeOff: (id: string) => void;
-  startBugTimer: (userId: string, bugNumber: string) => void;
+  startBugTimer: (userId: string, bugNumber: string, bugType: BugType, title?: string, description?: string) => void;
   stopBugTimer: () => void;
+  updateBugEntry: (entryId: string, updates: Partial<BugTimeEntry>) => void;
+  addBugSubtask: (entryId: string, subtask: Omit<BugSubtask, 'id'>) => void;
+  updateBugSubtask: (entryId: string, subtaskId: string, updates: Partial<BugSubtask>) => void;
+  markBugFinished: (entryId: string) => void;
   getTimeOffsForSprint: (sprintNumber: number) => TimeOff[];
   getSprintForDate: (date: Date) => Sprint;
 }
@@ -91,12 +95,17 @@ export const useStore = create<AppState>((set, get) => ({
   removeTimeOff: (id) =>
     set((state) => ({ timeOffs: state.timeOffs.filter((to) => to.id !== id) })),
 
-  startBugTimer: (userId, bugNumber) => {
+  startBugTimer: (userId, bugNumber, bugType, title, description) => {
     const newEntry: BugTimeEntry = {
       id: Date.now().toString(),
       userId,
       bugNumber,
+      bugType,
+      title: title || '',
+      description: description || '',
+      subtasks: [],
       startTime: new Date(),
+      isFinished: false,
     };
     set({ activeBugTimer: newEntry });
   },
@@ -118,6 +127,80 @@ export const useStore = create<AppState>((set, get) => ({
       bugTimeEntries: [...state.bugTimeEntries, completedEntry],
       activeBugTimer: null,
     }));
+  },
+
+  updateBugEntry: (entryId, updates) =>
+    set((state) => ({
+      bugTimeEntries: state.bugTimeEntries.map((entry) =>
+        entry.id === entryId ? { ...entry, ...updates } : entry
+      ),
+      activeBugTimer:
+        state.activeBugTimer?.id === entryId
+          ? { ...state.activeBugTimer, ...updates }
+          : state.activeBugTimer,
+    })),
+
+  addBugSubtask: (entryId, subtask) => {
+    const newSubtask: BugSubtask = {
+      ...subtask,
+      id: Date.now().toString() + Math.random().toString(),
+    };
+    const state = get();
+    if (state.activeBugTimer?.id === entryId) {
+      set({
+        activeBugTimer: {
+          ...state.activeBugTimer,
+          subtasks: [...state.activeBugTimer.subtasks, newSubtask],
+        },
+      });
+    } else {
+      set((state) => ({
+        bugTimeEntries: state.bugTimeEntries.map((entry) =>
+          entry.id === entryId
+            ? { ...entry, subtasks: [...entry.subtasks, newSubtask] }
+            : entry
+        ),
+      }));
+    }
+  },
+
+  updateBugSubtask: (entryId, subtaskId, updates) => {
+    const state = get();
+    if (state.activeBugTimer?.id === entryId) {
+      const updatedSubtasks = state.activeBugTimer.subtasks.map((st) =>
+        st.id === subtaskId ? { ...st, ...updates } : st
+      );
+      set({
+        activeBugTimer: {
+          ...state.activeBugTimer,
+          subtasks: updatedSubtasks,
+        },
+      });
+    } else {
+      set((state) => ({
+        bugTimeEntries: state.bugTimeEntries.map((entry) =>
+          entry.id === entryId
+            ? {
+                ...entry,
+                subtasks: entry.subtasks.map((st) =>
+                  st.id === subtaskId ? { ...st, ...updates } : st
+                ),
+              }
+            : entry
+        ),
+      }));
+    }
+  },
+
+  markBugFinished: (entryId) => {
+    const state = get();
+    const entry = state.bugTimeEntries.find((e) => e.id === entryId);
+    if (entry) {
+      get().updateBugEntry(entryId, {
+        isFinished: true,
+        finishedDate: new Date(),
+      });
+    }
   },
 
   getTimeOffsForSprint: (sprintNumber) => {
