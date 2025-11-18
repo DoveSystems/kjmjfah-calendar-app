@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
 import { useStore } from '../store/useStore';
-import { Calendar as CalendarIcon, Plus, X, Users } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import TimeOffDialog from './TimeOffDialog';
 
 const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showTimeOffDialog, setShowTimeOffDialog] = useState(false);
-  const { timeOffs, users, getSprintForDate, getTimeOffsForSprint } = useStore();
+  const { timeOffs, users, getSprintForDate } = useStore();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);

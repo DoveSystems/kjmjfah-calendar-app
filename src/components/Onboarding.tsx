@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { UserPlus, Sparkles, ArrowRight, Users, Globe, MapPin } from 'lucide-react';
+import { UserPlus, ArrowRight, Users, Globe, MapPin } from 'lucide-react';
 
 const countries = [
   'United States',

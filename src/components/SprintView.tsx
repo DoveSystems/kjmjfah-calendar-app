@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { Calendar, Users as UsersIcon } from 'lucide-react';
 
 const SprintView = () => {
-  const { timeOffs, users, getSprintForDate, getTimeOffsForSprint } = useStore();
+  const { users, getSprintForDate, getTimeOffsForSprint } = useStore();
   const today = new Date();
   const currentSprint = getSprintForDate(today);
   const nextSprint = getSprintForDate(new Date(currentSprint.endDate.getTime() + 1));
