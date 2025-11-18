@@ -1,8 +1,15 @@
 # KJMJFAH - Teams Calendar & Time Tracker
 
-A modern Teams calendar application that helps product teams organize time-off and track bug fixing time.
+A modern Teams calendar application that helps product teams organize time-off and track bug fixing time. Features a beautiful pixel-art themed onboarding experience with animated backgrounds and modern UI design.
 
 ## Features
+
+### 🎨 Modern Onboarding Experience
+- Beautiful pixel-art team background
+- Animated gradient orbs
+- Modern glassmorphism design
+- Smooth animations and transitions
+- Excellent contrast and accessibility
 
 ### 📅 Calendar & Time-Off Tracking
 - Visual calendar view showing team member availability
