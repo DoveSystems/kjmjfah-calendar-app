@@ -92,24 +92,22 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
-      {/* Pixel team background */}
-      <div className="absolute inset-0 opacity-10">
-        <div 
-          className="w-full h-full"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='20' y='100' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='30' y='140' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='25' y='90' width='30' height='20' fill='%23fbbf24'/%3E%3Crect x='35' y='70' width='10' height='20' fill='%231f2937'/%3E%3Crect x='100' y='80' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='110' y='120' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='105' y='70' width='30' height='20' fill='%23f59e0b'/%3E%3Crect x='115' y='50' width='10' height='20' fill='%231f2937'/%3E%3Crect x='180' y='100' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='190' y='140' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='185' y='90' width='30' height='20' fill='%23fbbf24'/%3E%3Crect x='195' y='70' width='10' height='20' fill='%231f2937'/%3E%3Crect x='260' y='90' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='270' y='130' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='265' y='80' width='30' height='20' fill='%23f59e0b'/%3E%3Crect x='275' y='60' width='10' height='20' fill='%231f2937'/%3E%3Crect x='340' y='100' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='350' y='140' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='345' y='90' width='30' height='20' fill='%23fbbf24'/%3E%3Crect x='355' y='70' width='10' height='20' fill='%231f2937'/%3E%3Crect x='60' y='180' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='70' y='220' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='65' y='170' width='30' height='20' fill='%23fbbf24'/%3E%3Crect x='75' y='150' width='10' height='20' fill='%231f2937'/%3E%3Crect x='140' y='200' width='40' height='40' fill='%23ffffff'/%3E%3Crect x='150' y='240' width='20' height='40' fill='%23e5e7eb'/%3E%3Crect x='145' y='190' width='30' height='20' fill='%23f59e0b'/%3E%3Crect x='155' y='170' width='10' height='20' fill='%231f2937'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '200px 150px',
-            imageRendering: 'pixelated'
-          }}
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Professional team collaboration background image */}
+      <div className="absolute inset-0">
+        <img 
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+          alt="Team collaboration"
+          className="w-full h-full object-cover"
         />
+        {/* Gradient overlay to blend with theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/90 via-purple-600/85 to-pink-600/90"></div>
       </div>
       
       {/* Animated gradient orbs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
 
       <div className="w-full max-w-2xl relative z-10">
         <div className="bg-white/95 backdrop-blur-2xl rounded-3xl p-8 md:p-12 shadow-2xl border border-white/20">
